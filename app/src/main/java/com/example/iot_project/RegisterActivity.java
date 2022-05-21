@@ -1,6 +1,10 @@
 package com.example.iot_project;
 
+import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -9,23 +13,38 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
+import android.os.Bundle;
+import android.app.Activity;
+import android.content.Context;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
-public class RegisterActivity extends AppCompatActivity {
+import java.util.List;
+
+public class RegisterActivity extends AppCompatActivity implements LocationListener {
 
     TextInputEditText etRegEmail;
     TextInputEditText etRegPassword;
     TextView tvLoginHere;
     Button btnRegister;
-
+    LocationManager locationManager;
     FirebaseAuth mAuth;
+    private FusedLocationProviderClient fusedLocationClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,8 +55,17 @@ public class RegisterActivity extends AppCompatActivity {
         etRegPassword = findViewById(R.id.etRegPass);
         tvLoginHere = findViewById(R.id.tvLoginHere);
         btnRegister = findViewById(R.id.btnRegister);
+        int LOCATION_REFRESH_TIME = 15000; // 15 seconds to update
+        int LOCATION_REFRESH_DISTANCE = 500;
 
         mAuth = FirebaseAuth.getInstance();
+//        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+//        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER.toString(),);
+        mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_REFRESH_TIME,
+                LOCATION_REFRESH_DISTANCE, mLocationListener);
+        
 
         btnRegister.setOnClickListener(view -> {
             createUser();
@@ -46,6 +74,8 @@ public class RegisterActivity extends AppCompatActivity {
         tvLoginHere.setOnClickListener(view -> {
             startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
         });
+
+
     }
 
     private void createUser() {
@@ -87,5 +117,25 @@ public class RegisterActivity extends AppCompatActivity {
 
         }
 
+    }
+
+    public void onLocationChanged(Location location) {
+
+        Log.d("Locationmessage","Latitude:" + location.getLatitude() + ", Longitude:" + location.getLongitude());
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+        Log.d("Latitude","disable");
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+        Log.d("Latitude","enable");
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+        Log.d("Latitude","status");
     }
 }
